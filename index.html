@@ -144,6 +144,17 @@ textarea{min-height:100px}
 width:100%;
 min-width:0;
 }
+
+.video-url-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  margin-bottom:10px;
+}
+.video-url-row input{min-width:0}
+@media(max-width:600px){
+  .video-url-row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
@@ -175,7 +186,7 @@ min-width:0;
 <button class="yellow" id="hanamaru" style="width:100%;margin-top:8px">💮 きょうの はなまる</button>
 <div class="cheer" id="cheer">🎉 ぜんぶ できた！ すごいね！！</div>
 </div></div><div class="card">
-<h2>📺 きょうの どうが</h2>
+<h2>📺 きょうの どうが</h2><div class="video-url-row"><input id="videoUrl" inputmode="url" placeholder="ユーチューブの URLを いれてね" type="url"/><button class="primary" id="videoLoad">この どうがを つかう</button></div>
 <div class="video-wrap"><div id="youtubePlayer"></div></div>
 <div class="video-controls">
 <button class="blue" id="videoRestart">⏮ さいしょから</button>
@@ -327,7 +338,40 @@ document.getElementById("swStop").onclick=()=>{if(!swTimer)return;swElapsed+=per
 document.getElementById("swReset").onclick=()=>{if(swTimer)clearInterval(swTimer);swTimer=null;swElapsed=0;document.getElementById("stopwatchTime").textContent="00:00.0"};
 
 let player,loopOn=false;
-window.onYouTubeIframeAPIReady=()=>{player=new YT.Player("youtubePlayer",{videoId:"A_AIidFDIWQ",playerVars:{playsinline:1,rel:0},events:{onStateChange:e=>{if(loopOn&&e.data===YT.PlayerState.ENDED){player.seekTo(0);player.playVideo()}}}})};
+let currentVideoId=localStorage.getItem("violinVideoId")||"A_AIidFDIWQ";
+
+function getYouTubeId(url){
+  try{
+    const u=new URL(url.trim());
+    if(u.hostname.includes("youtu.be")){
+      return u.pathname.split("/").filter(Boolean)[0]||"";
+    }
+    if(u.searchParams.get("v"))return u.searchParams.get("v");
+    const parts=u.pathname.split("/").filter(Boolean);
+    const mark=parts.findIndex(x=>["shorts","embed","live"].includes(x));
+    if(mark>=0&&parts[mark+1])return parts[mark+1];
+  }catch(e){}
+  const plain=url.trim();
+  if(/^[A-Za-z0-9_-]{6,}$/.test(plain))return plain;
+  return "";
+}
+
+window.onYouTubeIframeAPIReady=()=>{player=new YT.Player("youtubePlayer",{videoId:currentVideoId,playerVars:{playsinline:1,rel:0},events:{onStateChange:e=>{if(loopOn&&e.data===YT.PlayerState.ENDED){player.seekTo(0);player.playVideo()}}}})};
+
+const videoUrl=document.getElementById("videoUrl");
+if(videoUrl)videoUrl.value=`https://www.youtube.com/watch?v=${currentVideoId}`;
+document.getElementById("videoLoad").onclick=()=>{
+  const id=getYouTubeId(videoUrl.value);
+  if(!id){
+    alert("ユーチューブの URLを たしかめてね");
+    return;
+  }
+  currentVideoId=id;
+  localStorage.setItem("violinVideoId",id);
+  videoUrl.value=`https://www.youtube.com/watch?v=${id}`;
+  if(player&&player.loadVideoById)player.loadVideoById(id);
+};
+
 const api=document.createElement("script");api.src="https://www.youtube.com/iframe_api";document.head.appendChild(api);
 function ready(fn){if(player&&player[fn])player[fn]()}
 document.getElementById("videoRestart").onclick=()=>{if(player){player.seekTo(0);player.playVideo()}};
