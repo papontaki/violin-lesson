@@ -57,19 +57,7 @@ main{max-width:1440px;margin:auto;padding:16px}
   padding:8px;border:1px solid var(--line);border-radius:14px;background:#fff;
 }
 .practice-item input[type="checkbox"]{width:26px;height:26px}
-.practice-item textarea{
-  width:100%;
-  min-width:0;
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:10px;
-  font-size:16px;
-  line-height:1.5;
-  resize:none;
-  overflow:hidden;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-}
+
 .goal{
   width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;
 }
@@ -115,12 +103,7 @@ textarea{min-height:100px}
   .sheet{box-shadow:none;border:0}
 }
 
-.practice-item textarea{
-  min-width:0;
-  white-space:pre-wrap;
-  overflow-wrap:anywhere;
-  overflow:hidden;
-}
+
 .practice-item{align-items:start}
 
 .reward-row{
@@ -133,6 +116,29 @@ textarea{min-height:100px}
 }
 @media(max-width:700px){
   .reward-row{grid-template-columns:1fr}
+}
+
+.practice-item textarea{
+  width:100%;
+  min-width:0;
+  min-height:44px;
+  height:44px;
+  max-height:none;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  font-size:16px;
+  line-height:1.45;
+  resize:none;
+  overflow:hidden;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+}
+.calendar-title{
+  text-align:center;
+  font-size:20px;
+  font-weight:800;
+  margin:0 0 10px;
 }
 </style>
 </head>
@@ -188,7 +194,7 @@ textarea{min-height:100px}
 <div class="small" id="practiceDays" style="text-align:center;margin-top:10px"></div>
 </div><div class="card">
 <h2>📅 れんしゅう カレンダー</h2>
-<div class="calendar" id="calendar"></div>
+<div class="calendar-title" id="calendarTitle"></div><div class="calendar" id="calendar"></div>
 </div></div><div class="card sheet">
 <div class="meta">
 <input id="title" value="がくふを つくろう"/>
@@ -255,9 +261,16 @@ function renderPractice(){
     const t=document.createElement("textarea");
     t.rows=1;
     t.value=p.text;
-    const fit=()=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"};
-    t.oninput=()=>{p.text=t.value;fit();saveLocal()};
-    setTimeout(fit,0);
+    const fit=()=>{
+      t.style.height="44px";
+      t.style.height=Math.max(44,t.scrollHeight)+"px";
+    };
+    t.addEventListener("input",()=>{
+      p.text=t.value;
+      fit();
+      saveLocal();
+    });
+    requestAnimationFrame(fit);
     const del=document.createElement("button");del.textContent="けす";del.onclick=()=>{state.practices.splice(i,1);saveLocal();renderPractice();checkAll()};
     row.append(c,t,del);practiceList.appendChild(row);
   });
@@ -278,16 +291,26 @@ function renderStickers(){
   document.getElementById("practiceDays").textContent=`れんしゅうした ひ：${n}にち`;
 }
 function renderCalendar(){
-  const box=document.getElementById("calendar");box.innerHTML="";
-  const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  const box=document.getElementById("calendar");
+  if(!box)return;
+  box.innerHTML="";
+  const now=new Date();
+  const y=now.getFullYear();
+  const m=now.getMonth();
   const calendarTitle=document.getElementById("calendarTitle");
   if(calendarTitle)calendarTitle.textContent=`${y}ねん ${m+1}がつ`;
-  const first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate();
+  const first=new Date(y,m,1).getDay();
+  const last=new Date(y,m+1,0).getDate();
   for(let i=0;i<first;i++)box.appendChild(document.createElement("div"));
   for(let d=1;d<=last;d++){
-    const x=document.createElement("div");x.className="day";x.textContent=d;
+    const x=document.createElement("div");
+    x.className="day";
+    x.textContent=d;
     const key=`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`;
-    if(state.days.includes(key)){x.classList.add("done");x.textContent="🌸"}
+    if(state.days.includes(key)){
+      x.classList.add("done");
+      x.textContent="🌸";
+    }
     box.appendChild(x);
   }
 }
@@ -314,7 +337,22 @@ document.getElementById("videoLoop").onclick=e=>{loopOn=!loopOn;e.target.textCon
 const svg=document.getElementById("score"),NS="http://www.w3.org/2000/svg";
 let notes=state.notes||[],selectedPitch="A4",selectedDur=1,accidental="",selectedIndex=-1,playing=false;
 const pitches=["G3","A3","B3","C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5"];
-function makePitchButtons(){const b=document.getElementById("pitchButtons");pitches.forEach(p=>{const x=document.createElement("button");x.textContent=p;x.dataset.pitch=p;if(p===selectedPitch)x.classList.add("active");x.onclick=()=>{selectedPitch=p;[...b.children].forEach(y=>y.classList.toggle("active",y===x))};b.appendChild(x)})}
+const solfege={C:"ド",D:"レ",E:"ミ",F:"ファ",G:"ソ",A:"ラ",B:"シ"};
+function makePitchButtons(){
+  const box=document.getElementById("pitchButtons");
+  box.innerHTML="";
+  pitches.forEach(p=>{
+    const btn=document.createElement("button");
+    btn.innerHTML=`<strong>${p}</strong><br><span>${solfege[p[0]]}</span>`;
+    btn.dataset.pitch=p;
+    if(p===selectedPitch)btn.classList.add("active");
+    btn.onclick=()=>{
+      selectedPitch=p;
+      [...box.children].forEach(x=>x.classList.toggle("active",x===btn));
+    };
+    box.appendChild(btn);
+  });
+}
 makePitchButtons();
 document.querySelectorAll("#durationButtons button").forEach(b=>b.onclick=()=>{selectedDur=parseFloat(b.dataset.dur);document.querySelectorAll("#durationButtons button").forEach(x=>x.classList.toggle("active",x===b))});
 document.getElementById("sharpBtn").onclick=()=>{accidental=accidental==="#"?"":"#";document.getElementById("sharpBtn").classList.toggle("active",accidental==="#");document.getElementById("flatBtn").classList.remove("active")};
@@ -338,7 +376,24 @@ function render(){
   for(let s=0;s<systems;s++){const y=first+s*gap;for(let i=0;i<5;i++)svg.appendChild(el("line",{x1:left,y1:y+i*10,x2:right,y2:y+i*10,stroke:"#222"}));svg.appendChild(el("text",{x:78,y:y+34,"font-size":54},"𝄞"));svg.appendChild(el("text",{x:132,y:y+18,"font-size":18},meter.split("/")[0]));svg.appendChild(el("text",{x:132,y:y+38,"font-size":18},meter.split("/")[1]));for(let b=0;b<=bps;b++){const x=165+b*(right-165)/bps;svg.appendChild(el("line",{x1:x,y1:y,x2:x,y2:y+40,stroke:"#333"}))}}
   notes.forEach((n,i)=>{const bar=Math.floor(cur/bpb),inbar=cur%bpb,sys=Math.floor(bar/bps);if(sys>=systems){cur+=n.dur;return}const bw=(right-165)/bps,x=165+(bar%bps)*bw+22+(inbar/bpb)*(bw-38),sy=first+sys*gap,g=el("g");
     if(n.rest)g.appendChild(el("text",{x,y:sy+27,"text-anchor":"middle","font-size":25},"𝄽"));
-    else{const y=yPitch(n.pitch,sy);if(n.acc)g.appendChild(el("text",{x:x-17,y:y+6,"font-size":18},n.acc==="#"?"♯":"♭"));g.appendChild(head(x,y,n.dur<=1));if(n.dur<4){const up=y>sy+20,sx=up?x+6:x-6,end=up?y-34:y+34;g.appendChild(el("line",{x1:sx,y1:y,x2:sx,y2:end,stroke:"#222","stroke-width":2}));if(n.dur===.5)g.appendChild(el("path",{d:up?`M ${sx} ${end} q 15 7 8 22`:`M ${sx} ${end} q -15 -7 -8 -22`,fill:"none",stroke:"#222","stroke-width":2}))}}
+    else{
+      const y=yPitch(n.pitch,sy);
+      if(n.acc)g.appendChild(el("text",{x:x-17,y:y+6,"font-size":18},n.acc==="#"?"♯":"♭"));
+      g.appendChild(head(x,y,n.dur<=1));
+      g.appendChild(el("text",{
+        x:x,
+        y:sy+67,
+        "text-anchor":"middle",
+        "font-size":16,
+        "font-weight":700,
+        fill:"#496a62"
+      },solfege[n.pitch[0]]));
+      if(n.dur<4){
+        const up=y>sy+20,sx=up?x+6:x-6,end=up?y-34:y+34;
+        g.appendChild(el("line",{x1:sx,y1:y,x2:sx,y2:end,stroke:"#222","stroke-width":2}));
+        if(n.dur===.5)g.appendChild(el("path",{d:up?`M ${sx} ${end} q 15 7 8 22`:`M ${sx} ${end} q -15 -7 -8 -22`,fill:"none",stroke:"#222","stroke-width":2}))
+      }
+    }
     svg.appendChild(g);cur+=n.dur;
   });
   document.getElementById("countStatus").textContent=`${notes.length}こ の おんぷ`;document.getElementById("barStatus").textContent=`${bars} しょうせつ`;
