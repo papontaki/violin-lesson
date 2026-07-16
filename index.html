@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>ばいおりん れっすん がくふ</title>
+<style>
+:root{
+  --bg:#f6f2ea; --paper:#fffdf8; --ink:#1f2430; --accent:#a5483d;
+  --accent2:#496a62; --line:#d8d1c5; --soft:#ece5d9;
+}
+*{box-sizing:border-box}
+body{
+  margin:0; font-family:ui-sans-serif,system-ui,-apple-system,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  background:linear-gradient(135deg,#f7f3ec,#efe6da); color:var(--ink);
+}
+header{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 24px; background:rgba(255,253,248,.92); border-bottom:1px solid var(--line);
+  position:sticky; top:0; z-index:10; backdrop-filter:blur(10px);
+}
+.brand{display:flex; gap:12px; align-items:center}
+.logo{
+  width:42px;height:42px;border-radius:12px;background:var(--accent);color:white;
+  display:grid;place-items:center;font-size:24px;box-shadow:0 8px 20px rgba(165,72,61,.22)
+}
+h1{font-size:19px;margin:0}.sub{font-size:13px;color:#6c6f76;margin-top:2px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+button,select,input{
+  font:inherit;border:1px solid var(--line);border-radius:10px;background:white;color:var(--ink);
+}
+button{padding:11px 14px;cursor:pointer;transition:.15s}
+button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+button.primary{background:var(--accent);color:white;border-color:var(--accent)}
+button.secondary{background:var(--accent2);color:white;border-color:var(--accent2)}
+main{display:grid;grid-template-columns:280px 1fr;gap:18px;padding:18px;max-width:1400px;margin:auto}
+.panel,.sheet{
+  background:var(--paper);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 12px 30px rgba(58,45,28,.08)
+}
+.panel{padding:16px;height:max-content;position:sticky;top:96px}
+.section{padding:12px 0;border-bottom:1px solid var(--soft)}
+.section:last-child{border-bottom:0}
+.section h2{font-size:13px;margin:0 0 10px;color:#5d5046;text-transform:uppercase;letter-spacing:.08em}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+label{font-size:12px;color:#6d6f73;display:block;margin-bottom:5px}
+input,select{width:100%;padding:9px}
+.note-buttons{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.note-buttons button{padding:10px 6px}
+.note-buttons button.active{background:var(--accent2);color:white}
+.pitch-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.pitch-grid button{padding:9px 4px}
+.pitch-grid button.active{background:var(--accent);color:white}
+.hint{font-size:13px;line-height:1.8;color:#77736d}
+.sheet{padding:22px;min-height:720px}
+.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:18px}
+.meta input{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0}
+.score-wrap{overflow:auto;background:white;border:1px solid var(--soft);border-radius:12px;padding:14px}
+svg{display:block;min-width:900px;width:100%;height:auto}
+.status{display:flex;gap:14px;align-items:center;margin-top:14px;font-size:12px;color:#6f716e}
+.pill{padding:5px 9px;border-radius:99px;background:var(--soft)}
+.lesson-box{margin-top:18px;padding:14px;border:1px dashed var(--line);border-radius:12px;background:#fffaf1}
+.lesson-box textarea{width:100%;min-height:100px;border:0;background:transparent;resize:vertical;font:inherit}
+.kbd{font-family:ui-monospace,monospace;background:#eee7dc;border:1px solid #d9d0c2;border-radius:5px;padding:1px 5px}
+
+.stopwatch{
+  margin-top:18px;padding:14px;border:1px solid var(--line);border-radius:12px;background:#fffdf8;
+}
+.stopwatch-title{font-size:13px;font-weight:700;margin-bottom:8px;color:#5d5046}
+.stopwatch-time{
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:30px;font-weight:700;letter-spacing:.04em;text-align:center;
+  padding:10px 0;
+}
+.stopwatch-controls{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+@media(max-width:850px){
+  main{grid-template-columns:1fr}
+  .panel{position:static}
+  header{align-items:flex-start;gap:12px;flex-direction:column}
+  .meta{grid-template-columns:1fr}
+}
+@media print{
+  body{background:white}
+  header,.panel,.status{display:none!important}
+  main{display:block;padding:0}
+  .sheet{box-shadow:none;border:0;padding:0}
+  .score-wrap{border:0;padding:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">𝄞</div>
+    <div><h1>ばいおりん れっすん がくふ</h1><div class="sub">ばいおりんの れんしゅうよう がくふづくり</div></div>
+  </div>
+  <div class="actions">
+    <button id="newBtn">あたらしく</button>
+    <button id="saveBtn">ほぞん</button>
+    <button id="loadBtn">よみこみ</button>
+    <button id="playBtn" class="secondary">▶ さいせい</button>
+    <button onclick="window.print()" class="primary">いんさつ / PDF</button>
+  </div>
+</header>
+
+<main>
+  <aside class="panel">
+    <div class="section">
+      <h2>おんぷ</h2>
+      <div class="note-buttons" id="durationButtons">
+        <button data-dur="4">𝅝<br><small>全おんぷ</small></button>
+        <button data-dur="2">𝅗𝅥<br><small>にぶ</small></button>
+        <button data-dur="1" class="active">♩<br><small>しぶ</small></button>
+        <button data-dur="0.5">♪<br><small>はちぶ</small></button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>おとのたかさ</h2>
+      <div class="pitch-grid" id="pitchButtons"></div>
+      <div style="margin-top:8px" class="grid">
+        <button id="sharpBtn">♯</button>
+        <button id="flatBtn">♭</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>せってい</h2>
+      <div class="grid">
+        <div><label>はやさ</label><input id="tempo" type="number" min="40" max="220" value="92"></div>
+        <div><label>ひょうし</label>
+          <select id="meter"><option>4/4</option><option>3/4</option><option>2/4</option><option>6/8</option></select>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <label>ちょうごう</label>
+        <select id="key">
+          <option value="C">はちょうちょう / いたんちょう</option>
+          <option value="G">とちょうちょう / ほたんちょう</option>
+          <option value="D">にちょうちょう / ろたんちょう</option>
+          <option value="A">いちょうちょう / えいへたんちょう</option>
+          <option value="F">へちょうちょう / にたんちょう</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>へんしゅう</h2>
+      <div class="grid">
+        <button id="restBtn">きゅうふを いれる</button>
+        <button id="deleteBtn">さいごを けす</button>
+      </div>
+      <button id="clearBtn" style="width:100%;margin-top:8px">ぜんぶ けす</button>
+    </div>
+
+    <div class="section hint">
+      おとのたかさと長さを選び、「追加」を押します。<br>
+      きーぼーど: <span class="kbd">A-G</span> おとのたかさ、<span class="kbd">Space</span> さいせい、<span class="kbd">Backspace</span> けす
+      <button id="addBtn" class="primary" style="width:100%;margin-top:10px">＋ おんぷを追加</button>
+    </div>
+
+    <div class="stopwatch">
+      <div class="stopwatch-title">れんしゅう すとっぷうぉっち</div>
+      <div id="stopwatchTime" class="stopwatch-time">00:00.0</div>
+      <div class="stopwatch-controls">
+        <button id="stopwatchStart" class="secondary">すたーと</button>
+        <button id="stopwatchStop">すとっぷ</button>
+        <button id="stopwatchReset">りせっと</button>
+      </div>
+    </div>
+
+  </aside>
+
+  <section class="sheet">
+    <div class="meta">
+      <input id="title" value="ばいおりん れんしゅうきょく" aria-label="曲名">
+      <input id="student" placeholder="なまえ">
+      <input id="date" type="date">
+    </div>
+
+    <div class="score-wrap">
+      <svg id="score" viewBox="0 0 1100 620" aria-label="がくふ"></svg>
+    </div>
+
+    <div class="status">
+      <span class="pill" id="countStatus">0 音</span>
+      <span class="pill" id="barStatus">1 しょうせつ</span>
+      <span>おんぷをクリックすると選択できます。</span>
+    </div>
+
+    <div class="lesson-box">
+      <strong>せんせいの めも / れんしゅうの ぽいんと</strong>
+      <textarea id="memo" placeholder="れい：ゆみを まっすぐに うごかす。2しょうせつめは ゆっくり れんしゅうする。"></textarea>
+    </div>
+  </section>
+</main>
+
+<input id="fileInput" type="file" accept=".json" hidden>
+
+<script>
+const svg = document.getElementById('score');
+const NS = "http://www.w3.org/2000/svg";
+let notes = [];
+let selectedPitch = "A4";
+let selectedDur = 1;
+let accidental = "";
+let selectedIndex = -1;
+let playing = false;
+
+const pitches = ["G3","A3","B3","C4","D4","E4","F4","G4","A4","B4","C5","D5","E5","F5","G5","A5"];
+const jp = {G3:"G",A3:"A",B3:"B",C4:"C",D4:"D",E4:"E",F4:"F",G4:"G",A4:"A",B4:"B",C5:"C",D5:"D",E5:"E",F5:"F",G5:"G",A5:"A"};
+
+function el(name, attrs={}, text=""){
+  const n=document.createElementNS(NS,name);
+  for(const [k,v] of Object.entries(attrs)) n.setAttribute(k,v);
+  if(text) n.textContent=text;
+  return n;
+}
+function buildPitchButtons(){
+  const box=document.getElementById('pitchButtons');
+  pitches.forEach(p=>{
+    const b=document.createElement('button');
+    b.textContent=jp[p]+p.slice(-1);
+    b.dataset.pitch=p;
+    if(p===selectedPitch)b.classList.add('active');
+    b.onclick=()=>{
+      selectedPitch=p;
+      [...box.children].forEach(x=>x.classList.toggle('active',x.dataset.pitch===p));
+    };
+    box.appendChild(b);
+  });
+}
+buildPitchButtons();
+
+document.getElementById('date').valueAsDate=new Date();
+
+document.querySelectorAll('#durationButtons button').forEach(b=>{
+  b.onclick=()=>{
+    selectedDur=parseFloat(b.dataset.dur);
+    document.querySelectorAll('#durationButtons button').forEach(x=>x.classList.toggle('active',x===b));
+  };
+});
+document.getElementById('sharpBtn').onclick=()=>{
+  accidental=accidental==="#"?"":"#";
+  document.getElementById('sharpBtn').classList.toggle('active',accidental==="#");
+  document.getElementById('flatBtn').classList.remove('active');
+};
+document.getElementById('flatBtn').onclick=()=>{
+  accidental=accidental==="b"?"":"b";
+  document.getElementById('flatBtn').classList.toggle('active',accidental==="b");
+  document.getElementById('sharpBtn').classList.remove('active');
+};
+
+function addNote(){
+  notes.push({pitch:selectedPitch,dur:selectedDur,acc:accidental,rest:false});
+  selectedIndex=notes.length-1; render();
+}
+document.getElementById('addBtn').onclick=addNote;
+document.getElementById('restBtn').onclick=()=>{notes.push({dur:selectedDur,rest:true});selectedIndex=notes.length-1;render()};
+document.getElementById('deleteBtn').onclick=()=>{
+  if(selectedIndex>=0){notes.splice(selectedIndex,1);selectedIndex=Math.min(selectedIndex,notes.length-1)}
+  else notes.pop();
+  render();
+};
+document.getElementById('clearBtn').onclick=()=>{if(confirm("すべてのおんぷを消去しますか？")){notes=[];selectedIndex=-1;render()}};
+document.getElementById('newBtn').onclick=()=>{notes=[];selectedIndex=-1;document.getElementById('title').value="あたらしい れんしゅうきょく";document.getElementById('memo').value="";render()};
+
+function pitchStep(p){
+  const order=["C","D","E","F","G","A","B"];
+  const l=p[0],o=parseInt(p.slice(-1));
+  return (o-4)*7+order.indexOf(l); // C4=0
+}
+function yForPitch(p, staffY){
+  return staffY+40 - pitchStep(p)*5;
+}
+function durBeats(n){return n.dur}
+function noteHead(x,y,filled=true){
+  const g=el("g",{transform:`translate(${x} ${y}) rotate(-18)`});
+  g.appendChild(el("ellipse",{cx:0,cy:0,rx:7.5,ry:5.2,fill:filled?"#1f2430":"white",stroke:"#1f2430","stroke-width":2}));
+  return g;
+}
+function render(){
+  svg.innerHTML="";
+  svg.appendChild(el("rect",{x:0,y:0,width:1100,height:620,fill:"#fff"}));
+  const title=document.getElementById('title').value||"だいめいなし";
+  svg.appendChild(el("text",{x:550,y:38,"text-anchor":"middle","font-size":24,"font-weight":700},title));
+  svg.appendChild(el("text",{x:1040,y:38,"text-anchor":"end","font-size":12,fill:"#666"},`♩ = ${document.getElementById('tempo').value}`));
+
+  const meter=document.getElementById('meter').value;
+  const beatsPerBar=meter==="6/8"?3:parseInt(meter.split('/')[0]);
+  const systems=4, staffLeft=70, staffRight=1040, sysGap=135, firstY=92;
+  const totalBeats=Math.max(notes.reduce((s,n)=>s+durBeats(n),0),1);
+  const bars=Math.max(1,Math.ceil(totalBeats/beatsPerBar));
+  const barsPerSystem=Math.max(1,Math.ceil(bars/systems));
+  let beatCursor=0;
+
+  for(let s=0;s<systems;s++){
+    const y=firstY+s*sysGap;
+    for(let i=0;i<5;i++)svg.appendChild(el("line",{x1:staffLeft,y1:y+i*10,x2:staffRight,y2:y+i*10,stroke:"#222","stroke-width":1.2}));
+    svg.appendChild(el("text",{x:78,y:y+34,"font-size":54,"font-family":"serif"},"𝄞"));
+    svg.appendChild(el("text",{x:132,y:y+17,"font-size":18,"font-weight":700},meter.split('/')[0]));
+    svg.appendChild(el("text",{x:132,y:y+37,"font-size":18,"font-weight":700},meter.split('/')[1]));
+    for(let b=0;b<=barsPerSystem;b++){
+      const x=165+b*(staffRight-165)/barsPerSystem;
+      svg.appendChild(el("line",{x1:x,y1:y,x2:x,y2:y+40,stroke:"#333","stroke-width":b===0||b===barsPerSystem?1.8:1}));
+    }
+  }
+
+  notes.forEach((n,idx)=>{
+    const bar=Math.floor(beatCursor/beatsPerBar);
+    const inBar=beatCursor%beatsPerBar;
+    const sys=Math.floor(bar/barsPerSystem);
+    if(sys>=systems){beatCursor+=durBeats(n);return}
+    const barInSys=bar%barsPerSystem;
+    const barW=(staffRight-165)/barsPerSystem;
+    const x=165+barInSys*barW + 22 + (inBar/beatsPerBar)*(barW-38);
+    const staffY=firstY+sys*sysGap;
+    const g=el("g",{"data-index":idx,style:"cursor:pointer"});
+    if(idx===selectedIndex) g.appendChild(el("circle",{cx:x,cy:staffY+20,r:19,fill:"#f1d7cf"}));
+
+    if(n.rest){
+      g.appendChild(el("text",{x:x,y:staffY+27,"text-anchor":"middle","font-size":25},"𝄽"));
+    }else{
+      const y=yForPitch(n.pitch,staffY);
+      if(n.acc) g.appendChild(el("text",{x:x-17,y:y+6,"font-size":18},n.acc==="#"?"♯":"♭"));
+      const filled=n.dur<=1;
+      g.appendChild(noteHead(x,y,filled));
+      if(n.dur<4){
+        const up=y>staffY+20;
+        const stemX=up?x+6:x-6;
+        const stemEnd=up?y-34:y+34;
+        g.appendChild(el("line",{x1:stemX,y1:y,x2:stemX,y2:stemEnd,stroke:"#222","stroke-width":2}));
+        if(n.dur===0.5){
+          g.appendChild(el("path",{d:up?`M ${stemX} ${stemEnd} q 15 7 8 22`:`M ${stemX} ${stemEnd} q -15 -7 -8 -22`,fill:"none",stroke:"#222","stroke-width":2}));
+        }
+      }
+      // ledger lines
+      if(y>staffY+45){
+        for(let ly=staffY+50;ly<=y+2;ly+=10) g.insertBefore(el("line",{x1:x-12,y1:ly,x2:x+12,y2:ly,stroke:"#222","stroke-width":1.2}),g.firstChild);
+      }
+      if(y<staffY-5){
+        for(let ly=staffY-10;ly>=y-2;ly-=10) g.insertBefore(el("line",{x1:x-12,y1:ly,x2:x+12,y2:ly,stroke:"#222","stroke-width":1.2}),g.firstChild);
+      }
+    }
+    g.onclick=()=>{selectedIndex=idx;render()};
+    svg.appendChild(g);
+    beatCursor+=durBeats(n);
+  });
+  document.getElementById('countStatus').textContent=`${notes.length}こ の おんぷ`;
+  document.getElementById('barStatus').textContent=`${bars} しょうせつ`;
+}
+
+["title","tempo","meter","key"].forEach(id=>document.getElementById(id).addEventListener("input",render));
+
+function midi(p,acc=""){
+  const map={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  return (parseInt(p.slice(-1))+1)*12+map[p[0]]+(acc==="#"?1:acc==="b"?-1:0);
+}
+function freq(m){return 440*Math.pow(2,(m-69)/12)}
+async function play(){
+  if(playing||!notes.length)return;
+  playing=true;document.getElementById('playBtn').textContent="■ さいせいちゅう";
+  const ctx=new (window.AudioContext||window.webkitAudioContext)();
+  const tempo=parseInt(document.getElementById('tempo').value)||92;
+  const beat=60/tempo;
+  let t=ctx.currentTime+.05;
+  notes.forEach(n=>{
+    const len=n.dur*beat;
+    if(!n.rest){
+      const osc=ctx.createOscillator(), gain=ctx.createGain();
+      osc.type="triangle";osc.frequency.value=freq(midi(n.pitch,n.acc));
+      gain.gain.setValueAtTime(.0001,t);
+      gain.gain.exponentialRampToValueAtTime(.18,t+.02);
+      gain.gain.exponentialRampToValueAtTime(.0001,t+Math.max(.08,len*.9));
+      osc.connect(gain).connect(ctx.destination);osc.start(t);osc.stop(t+len);
+    }
+    t+=len;
+  });
+  setTimeout(()=>{playing=false;document.getElementById('playBtn').textContent="▶ さいせい";ctx.close()},Math.max(0,(t-ctx.currentTime)*1000));
+}
+document.getElementById('playBtn').onclick=play;
+
+function snapshot(){
+  return {
+    version:1, title:document.getElementById('title').value, student:document.getElementById('student').value,
+    date:document.getElementById('date').value, tempo:document.getElementById('tempo').value,
+    meter:document.getElementById('meter').value,key:document.getElementById('key').value,
+    memo:document.getElementById('memo').value,notes
+  };
+}
+document.getElementById('saveBtn').onclick=()=>{
+  const blob=new Blob([JSON.stringify(snapshot(),null,2)],{type:"application/json"});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=(document.getElementById('title').value||"violin-score")+".json";a.click();URL.revokeObjectURL(a.href);
+};
+document.getElementById('loadBtn').onclick=()=>document.getElementById('fileInput').click();
+document.getElementById('fileInput').onchange=e=>{
+  const file=e.target.files[0];if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const d=JSON.parse(r.result);
+      ["title","student","date","tempo","meter","key","memo"].forEach(k=>{if(d[k]!==undefined)document.getElementById(k).value=d[k]});
+      notes=Array.isArray(d.notes)?d.notes:[];selectedIndex=-1;render();
+    }catch{alert("ふぁいるを よみこめませんでした。")}
+  };r.readAsText(file);
+};
+
+document.addEventListener("keydown",e=>{
+  if(["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName))return;
+  if("ABCDEFG".includes(e.key.toUpperCase())){
+    const letter=e.key.toUpperCase();
+    const found=pitches.find(p=>p[0]===letter && p.endsWith("4"))||pitches.find(p=>p[0]===letter);
+    if(found){selectedPitch=found;document.querySelectorAll('#pitchButtons button').forEach(x=>x.classList.toggle('active',x.dataset.pitch===found));addNote()}
+  }else if(e.code==="Space"){e.preventDefault();play()}
+  else if(e.key==="Backspace"){e.preventDefault();document.getElementById('deleteBtn').click()}
+});
+
+let stopwatchStartTime = 0;
+let stopwatchElapsed = 0;
+let stopwatchTimer = null;
+
+function formatStopwatch(ms){
+  const totalTenths = Math.floor(ms / 100);
+  const minutes = Math.floor(totalTenths / 600);
+  const seconds = Math.floor((totalTenths % 600) / 10);
+  const tenths = totalTenths % 10;
+  return `${String(minutes).padStart(2,"0")}:${String(seconds).padStart(2,"0")}.${tenths}`;
+}
+function updateStopwatch(){
+  const now = performance.now();
+  const current = stopwatchElapsed + (now - stopwatchStartTime);
+  document.getElementById("stopwatchTime").textContent = formatStopwatch(current);
+}
+document.getElementById("stopwatchStart").onclick = ()=>{
+  if(stopwatchTimer) return;
+  stopwatchStartTime = performance.now();
+  stopwatchTimer = setInterval(updateStopwatch, 100);
+};
+document.getElementById("stopwatchStop").onclick = ()=>{
+  if(!stopwatchTimer) return;
+  stopwatchElapsed += performance.now() - stopwatchStartTime;
+  clearInterval(stopwatchTimer);
+  stopwatchTimer = null;
+  updateStopwatch();
+};
+document.getElementById("stopwatchReset").onclick = ()=>{
+  if(stopwatchTimer){
+    clearInterval(stopwatchTimer);
+    stopwatchTimer = null;
+  }
+  stopwatchElapsed = 0;
+  stopwatchStartTime = 0;
+  document.getElementById("stopwatchTime").textContent = "00:00.0";
+};
+
+render();
+</script>
+</body>
+</html>
