@@ -57,8 +57,18 @@ main{max-width:1440px;margin:auto;padding:16px}
   padding:8px;border:1px solid var(--line);border-radius:14px;background:#fff;
 }
 .practice-item input[type="checkbox"]{width:26px;height:26px}
-.practice-item input[type="text"]{
-  width:100%;border:1px solid var(--line);border-radius:10px;padding:10px;font-size:16px;
+.practice-item textarea{
+  width:100%;
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:10px;
+  font-size:16px;
+  line-height:1.5;
+  resize:none;
+  overflow:hidden;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
 }
 .goal{
   width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:16px;
@@ -69,6 +79,12 @@ main{max-width:1440px;margin:auto;padding:16px}
 .stickers{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;text-align:center}
 .sticker{padding:10px 4px;border-radius:14px;background:#f7f7f7;opacity:.35}
 .sticker.on{opacity:1;background:#fff6cf}
+.calendar-title{
+  text-align:center;
+  font-size:20px;
+  font-weight:800;
+  margin-bottom:10px;
+}
 .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
 .day{aspect-ratio:1;border-radius:10px;background:#f6f6f6;display:grid;place-items:center;font-size:12px}
 .day.done{background:#ffe2ea}
@@ -99,11 +115,11 @@ textarea{min-height:100px}
   .sheet{box-shadow:none;border:0}
 }
 
-.practice-item input[type="text"]{
+.practice-item textarea{
   min-width:0;
-  white-space:normal;
-  overflow:visible;
-  text-overflow:clip;
+  white-space:pre-wrap;
+  overflow-wrap:anywhere;
+  overflow:hidden;
 }
 .practice-item{align-items:start}
 
@@ -236,7 +252,12 @@ function renderPractice(){
   state.practices.forEach((p,i)=>{
     const row=document.createElement("div");row.className="practice-item";
     const c=document.createElement("input");c.type="checkbox";c.checked=p.done;c.onchange=()=>{p.done=c.checked;saveLocal();checkAll();};
-    const t=document.createElement("input");t.type="text";t.value=p.text;t.oninput=()=>{p.text=t.value;saveLocal()};
+    const t=document.createElement("textarea");
+    t.rows=1;
+    t.value=p.text;
+    const fit=()=>{t.style.height="auto";t.style.height=t.scrollHeight+"px"};
+    t.oninput=()=>{p.text=t.value;fit();saveLocal()};
+    setTimeout(fit,0);
     const del=document.createElement("button");del.textContent="けす";del.onclick=()=>{state.practices.splice(i,1);saveLocal();renderPractice();checkAll()};
     row.append(c,t,del);practiceList.appendChild(row);
   });
@@ -259,6 +280,8 @@ function renderStickers(){
 function renderCalendar(){
   const box=document.getElementById("calendar");box.innerHTML="";
   const now=new Date(), y=now.getFullYear(), m=now.getMonth();
+  const calendarTitle=document.getElementById("calendarTitle");
+  if(calendarTitle)calendarTitle.textContent=`${y}ねん ${m+1}がつ`;
   const first=new Date(y,m,1).getDay(), last=new Date(y,m+1,0).getDate();
   for(let i=0;i<first;i++)box.appendChild(document.createElement("div"));
   for(let d=1;d<=last;d++){
