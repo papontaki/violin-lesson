@@ -1,9 +1,10 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ばいおりん れっすん</title>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<title>ヴァイオリン れっすん</title>
 <style>
 :root{
   --bg:#fff7f0;--paper:#fff;--ink:#24324a;--pink:#ff8aa1;--blue:#6aa9ff;
@@ -48,11 +49,11 @@ main{max-width:1440px;margin:auto;padding:16px}
 .video-wrap{position:relative;padding-top:56.25%;border-radius:16px;overflow:hidden;background:#000}
 .video-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 .video-controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.content-grid{display:grid;grid-template-columns:340px 1fr;gap:16px;margin-top:16px}
+.content-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-top:16px}
 .left-stack{display:grid;gap:16px}
 .practice-list{display:grid;gap:9px}
 .practice-item{
-  display:grid;grid-template-columns:42px 1fr 44px 44px 44px;gap:7px;align-items:center;
+  display:grid;grid-template-columns:42px minmax(0,1fr) 58px;gap:7px;align-items:center;
   padding:8px;border:1px solid var(--line);border-radius:14px;background:#fff;
 }
 .practice-item input[type="checkbox"]{width:26px;height:26px}
@@ -97,126 +98,114 @@ textarea{min-height:100px}
   main,.content-grid{display:block;padding:0}
   .sheet{box-shadow:none;border:0}
 }
+
+.practice-item input[type="text"]{
+  min-width:0;
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+}
+.practice-item{align-items:start}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">
-    <div class="logo">🎻</div>
-    <div><h1>ばいおりん れっすん</h1><div class="small">まいにち たのしく れんしゅうしよう</div></div>
-  </div>
-  <div class="top-actions">
-    <button id="saveBtn">ほぞん</button>
-    <button id="loadBtn">よみこみ</button>
-    <button id="playBtn" class="blue">▶ さいせい</button>
-    <button onclick="window.print()" class="primary">いんさつ</button>
-  </div>
+<div class="brand">
+<div class="logo">🎻</div>
+<div><h1>ヴァイオリン れっすん</h1><div class="small">まいにち たのしく れんしゅうしよう</div></div>
+</div>
+<div class="top-actions">
+<button id="saveBtn">ほぞん</button>
+<button id="loadBtn">よみこみ</button>
+<button class="blue" id="playBtn">▶ さいせい</button>
+<button class="primary" onclick="window.print()">いんさつ</button>
+</div>
 </header>
-
 <main>
-  <section class="top-grid">
-    <div class="card">
-      <h2>⏱ れんしゅう すとっぷうぉっち</h2>
-      <div id="stopwatchTime" class="stopwatch-time">00:00.0</div>
-      <div class="three">
-        <button id="swStart" class="green">すたーと</button>
-        <button id="swStop">すとっぷ</button>
-        <button id="swReset">りせっと</button>
-      </div>
-    </div>
+<section class="top-grid"><div class="left-stack"><div class="card">
+<h2>⏱ れんしゅう ストップウォッチ</h2>
+<div class="stopwatch-time" id="stopwatchTime">00:00.0</div>
+<div class="three">
+<button class="green" id="swStart">スタート</button>
+<button id="swStop">ストップ</button>
+<button id="swReset">リセット</button>
+</div>
+</div><div class="card">
+<h2>🌸 きょうの れんしゅう</h2>
 
-    <div class="card">
-      <h2>📺 きょうの どうが</h2>
-      <div class="video-wrap"><div id="youtubePlayer"></div></div>
-      <div class="video-controls">
-        <button id="videoRestart" class="blue">⏮ さいしょから</button>
-        <button id="videoPlay">▶ つづきから</button>
-        <button id="videoPause">⏸ とめる</button>
-        <button id="videoSlow75">🐢 0.75ばい</button>
-        <button id="videoSlow50">🐢 0.5ばい</button>
-        <button id="videoNormal">1ばい</button>
-        <button id="videoLoop">🔁 くりかえし: おふ</button>
-      </div>
-    </div>
-  </section>
 
-  <section class="content-grid">
-    <div class="left-stack">
-      <div class="card">
-        <h2>🌸 きょうの れんしゅう</h2>
-        <label>きょうの めあて</label>
-        <input id="goal" class="goal" placeholder="れい：ゆみを まっすぐに うごかす">
-        <div style="height:10px"></div>
-        <div id="practiceList" class="practice-list"></div>
-        <button id="addPractice" class="primary" style="width:100%;margin-top:10px">＋ れんしゅうを ふやす</button>
-        <button id="hanamaru" class="yellow" style="width:100%;margin-top:8px">💮 きょうの はなまる</button>
-        <div id="cheer" class="cheer">🎉 ぜんぶ できた！ すごいね！！</div>
-      </div>
 
-      <div class="card">
-        <h2>🏅 がんばった しーる</h2>
-        <div class="stickers">
-          <div id="s1" class="sticker"><div style="font-size:30px">⭐</div><div>1にち</div></div>
-          <div id="s3" class="sticker"><div style="font-size:30px">🐰</div><div>3にち</div></div>
-          <div id="s7" class="sticker"><div style="font-size:30px">🐻</div><div>7にち</div></div>
-          <div id="s30" class="sticker"><div style="font-size:30px">🦁</div><div>30にち</div></div>
-        </div>
-        <div id="practiceDays" class="small" style="text-align:center;margin-top:10px"></div>
-      </div>
-
-      <div class="card">
-        <h2>📅 れんしゅう かれんだー</h2>
-        <div id="calendar" class="calendar"></div>
-      </div>
-
-      <div class="card">
-        <h2>🎵 おんぷを いれる</h2>
-        <div class="section">
-          <h3>おんぷの ながさ</h3>
-          <div id="durationButtons" class="note-buttons">
-            <button data-dur="4">𝅝<br>ぜん</button>
-            <button data-dur="2">𝅗𝅥<br>にぶ</button>
-            <button data-dur="1" class="active">♩<br>しぶ</button>
-            <button data-dur="0.5">♪<br>はちぶ</button>
-          </div>
-        </div>
-        <div class="section">
-          <h3>おとの たかさ</h3>
-          <div id="pitchButtons" class="pitch-grid"></div>
-          <div class="two" style="margin-top:8px"><button id="sharpBtn">♯</button><button id="flatBtn">♭</button></div>
-        </div>
-        <div class="section">
-          <div class="two">
-            <div><label>はやさ</label><input id="tempo" type="number" min="40" max="220" value="92"></div>
-            <div><label>ひょうし</label><select id="meter"><option>4/4</option><option>3/4</option><option>2/4</option><option>6/8</option></select></div>
-          </div>
-        </div>
-        <div class="section">
-          <button id="addBtn" class="primary" style="width:100%">＋ おんぷを いれる</button>
-          <div class="two" style="margin-top:8px"><button id="restBtn">きゅうふ</button><button id="deleteBtn">さいごを けす</button></div>
-          <button id="clearBtn" style="width:100%;margin-top:8px">ぜんぶ けす</button>
-        </div>
-      </div>
-    </div>
-
-    <div class="card sheet">
-      <div class="meta">
-        <input id="title" value="ばいおりん れんしゅうきょく">
-        <input id="student" placeholder="なまえ">
-        <input id="date" type="date">
-      </div>
-      <div class="score-wrap"><svg id="score" viewBox="0 0 1100 620"></svg></div>
-      <div class="status"><span id="countStatus" class="pill">0こ の おんぷ</span><span id="barStatus" class="pill">1 しょうせつ</span></div>
-      <div style="margin-top:14px">
-        <label>せんせいの めも</label>
-        <textarea id="memo" placeholder="れい：ゆみを まっすぐに うごかそう"></textarea>
-      </div>
-    </div>
-  </section>
+<div class="practice-list" id="practiceList"></div>
+<button class="primary" id="addPractice" style="width:100%;margin-top:10px">＋ れんしゅうを ふやす</button>
+<button class="yellow" id="hanamaru" style="width:100%;margin-top:8px">💮 きょうの はなまる</button>
+<div class="cheer" id="cheer">🎉 ぜんぶ できた！ すごいね！！</div>
+</div></div><div class="card">
+<h2>📺 きょうの どうが</h2>
+<div class="video-wrap"><div id="youtubePlayer"></div></div>
+<div class="video-controls">
+<button class="blue" id="videoRestart">⏮ さいしょから</button>
+<button id="videoPlay">▶ つづきから</button>
+<button id="videoPause">⏸ とめる</button>
+<button id="videoSlow75">🐢 0.75ばい</button>
+<button id="videoSlow50">🐢 0.5ばい</button>
+<button id="videoNormal">1ばい</button>
+<button id="videoLoop">🔁 くりかえし: おふ</button>
+</div>
+</div></section>
+<section class="content-grid"><div class="card sheet">
+<div class="meta">
+<input id="title" value="ヴァイオリン れんしゅうきょく"/>
+<input id="student" placeholder="なまえ"/>
+<input id="date" type="date"/>
+</div>
+<div class="score-wrap"><svg id="score" viewbox="0 0 1100 620"></svg></div>
+<div class="status"><span class="pill" id="countStatus">0こ の おんぷ</span><span class="pill" id="barStatus">1 しょうせつ</span></div>
+<div style="margin-top:14px">
+<label>せんせいの めも</label>
+<textarea id="memo" placeholder="れい：ゆみを まっすぐに うごかそう"></textarea>
+</div>
+</div><div class="card">
+<h2>🎵 おんぷを いれる</h2>
+<div class="section">
+<h3>おんぷの ながさ</h3>
+<div class="note-buttons" id="durationButtons">
+<button data-dur="4">𝅝<br/>ぜん</button>
+<button data-dur="2">𝅗𝅥<br/>にぶ</button>
+<button class="active" data-dur="1">♩<br/>しぶ</button>
+<button data-dur="0.5">♪<br/>はちぶ</button>
+</div>
+</div>
+<div class="section">
+<h3>おとの たかさ</h3>
+<div class="pitch-grid" id="pitchButtons"></div>
+<div class="two" style="margin-top:8px"><button id="sharpBtn">♯</button><button id="flatBtn">♭</button></div>
+</div>
+<div class="section">
+<div class="two">
+<div><label>はやさ</label><input id="tempo" max="220" min="40" type="number" value="92"/></div>
+<div><label>ひょうし</label><select id="meter"><option>4/4</option><option>3/4</option><option>2/4</option><option>6/8</option></select></div>
+</div>
+</div>
+<div class="section">
+<button class="primary" id="addBtn" style="width:100%">＋ おんぷを いれる</button>
+<div class="two" style="margin-top:8px"><button id="restBtn">きゅうふ</button><button id="deleteBtn">さいごを けす</button></div>
+<button id="clearBtn" style="width:100%;margin-top:8px">ぜんぶ けす</button>
+</div>
+</div><div class="card">
+<h2>🏅 がんばった シール</h2>
+<div class="stickers">
+<div class="sticker" id="s1"><div style="font-size:30px">⭐</div><div>1にち</div></div>
+<div class="sticker" id="s3"><div style="font-size:30px">🐰</div><div>3にち</div></div>
+<div class="sticker" id="s7"><div style="font-size:30px">🐻</div><div>7にち</div></div>
+<div class="sticker" id="s30"><div style="font-size:30px">🦁</div><div>30にち</div></div>
+</div>
+<div class="small" id="practiceDays" style="text-align:center;margin-top:10px"></div>
+</div><div class="card">
+<h2>📅 れんしゅう カレンダー</h2>
+<div class="calendar" id="calendar"></div>
+</div></section>
 </main>
-
-<input id="fileInput" type="file" accept=".json" hidden>
-
+<input accept=".json" hidden="" id="fileInput" type="file"/>
 <script>
 const KEY="violinLessonV2";
 let state={
@@ -239,10 +228,8 @@ function renderPractice(){
     const row=document.createElement("div");row.className="practice-item";
     const c=document.createElement("input");c.type="checkbox";c.checked=p.done;c.onchange=()=>{p.done=c.checked;saveLocal();checkAll();};
     const t=document.createElement("input");t.type="text";t.value=p.text;t.oninput=()=>{p.text=t.value;saveLocal()};
-    const up=document.createElement("button");up.textContent="↑";up.onclick=()=>{if(i>0){[state.practices[i-1],state.practices[i]]=[state.practices[i],state.practices[i-1]];saveLocal();renderPractice()}};
-    const down=document.createElement("button");down.textContent="↓";down.onclick=()=>{if(i<state.practices.length-1){[state.practices[i+1],state.practices[i]]=[state.practices[i],state.practices[i+1]];saveLocal();renderPractice()}};
-    const del=document.createElement("button");del.textContent="🗑";del.onclick=()=>{state.practices.splice(i,1);saveLocal();renderPractice();checkAll()};
-    row.append(c,t,up,down,del);practiceList.appendChild(row);
+    const del=document.createElement("button");del.textContent="けす";del.onclick=()=>{state.practices.splice(i,1);saveLocal();renderPractice();checkAll()};
+    row.append(c,t,del);practiceList.appendChild(row);
   });
 }
 function checkAll(){
@@ -250,8 +237,7 @@ function checkAll(){
   document.getElementById("cheer").style.display=all?"block":"none";
 }
 document.getElementById("addPractice").onclick=()=>{state.practices.push({text:"あたらしい れんしゅう",done:false});saveLocal();renderPractice()};
-document.getElementById("goal").value=state.goal||"";
-document.getElementById("goal").oninput=e=>{state.goal=e.target.value;saveLocal()};
+saveLocal()};
 document.getElementById("hanamaru").onclick=()=>{
   const d=today();if(!state.days.includes(d))state.days.push(d);
   saveLocal();renderStickers();renderCalendar();
@@ -335,9 +321,9 @@ async function play(){if(playing||!notes.length)return;playing=true;document.get
 document.getElementById("playBtn").onclick=play;
 
 function snapshot(){return{...state,title:document.getElementById("title").value,student:document.getElementById("student").value,date:document.getElementById("date").value,tempo:document.getElementById("tempo").value,meter:document.getElementById("meter").value,memo:document.getElementById("memo").value,notes}}
-document.getElementById("saveBtn").onclick=()=>{const b=new Blob([JSON.stringify(snapshot(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="ばいおりん-れっすん.json";a.click();URL.revokeObjectURL(a.href)};
+document.getElementById("saveBtn").onclick=()=>{const b=new Blob([JSON.stringify(snapshot(),null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download="ヴァイオリン-れっすん.json";a.click();URL.revokeObjectURL(a.href)};
 document.getElementById("loadBtn").onclick=()=>document.getElementById("fileInput").click();
-document.getElementById("fileInput").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);state={...state,...d};notes=d.notes||[];["title","student","date","tempo","meter","memo"].forEach(k=>{if(d[k]!==undefined)document.getElementById(k).value=d[k]});document.getElementById("goal").value=state.goal||"";saveLocal();renderPractice();renderStickers();renderCalendar();render()}catch{alert("ふぁいるを よみこめなかったよ")}};r.readAsText(f)};
+document.getElementById("fileInput").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);state={...state,...d};notes=d.notes||[];["title","student","date","tempo","meter","memo"].forEach(k=>{if(d[k]!==undefined)document.getElementById(k).value=d[k]});saveLocal();renderPractice();renderStickers();renderCalendar();render()}catch{alert("ふぁいるを よみこめなかったよ")}};r.readAsText(f)};
 
 renderPractice();checkAll();renderStickers();renderCalendar();render();
 </script>
