@@ -246,7 +246,6 @@ function checkAll(){
   document.getElementById("cheer").style.display=all?"block":"none";
 }
 document.getElementById("addPractice").onclick=()=>{state.practices.push({text:"あたらしい れんしゅう",done:false});saveLocal();renderPractice()};
-saveLocal()};
 document.getElementById("hanamaru").onclick=()=>{
   const d=today();if(!state.days.includes(d))state.days.push(d);
   saveLocal();renderStickers();renderCalendar();
