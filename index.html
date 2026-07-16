@@ -87,7 +87,7 @@ input,select,textarea{
   width:100%;border:1px solid var(--line);border-radius:12px;padding:11px;background:#fff;
 }
 .sheet{min-height:740px}
-.meta{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.meta{display:grid;grid-template-columns:1.2fr 1.2fr 1fr 1fr;gap:10px;margin-bottom:12px;align-items:center}
 .score-wrap{overflow:auto;border:1px solid var(--line);border-radius:16px;background:#fff;padding:12px}
 svg{display:block;min-width:900px;width:100%;height:auto}
 .status{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -139,6 +139,10 @@ textarea{min-height:100px}
   font-size:20px;
   font-weight:800;
   margin:0 0 10px;
+}
+#date{
+width:100%;
+min-width:0;
 }
 </style>
 </head>
@@ -204,7 +208,7 @@ textarea{min-height:100px}
 <div class="score-wrap"><svg id="score" viewbox="0 0 1100 620"></svg></div>
 <div class="status"><span class="pill" id="countStatus">0こ の おんぷ</span><span class="pill" id="barStatus">1 しょうせつ</span></div>
 <div style="margin-top:14px">
-<label>せんせいの めも</label>
+<label>めも</label>
 <textarea id="memo" placeholder="れい：ゆみを まっすぐに うごかそう"></textarea>
 </div>
 </div><div class="card">
