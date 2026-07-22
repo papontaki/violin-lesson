@@ -155,6 +155,11 @@ min-width:0;
 @media(max-width:600px){
   .video-url-row{grid-template-columns:1fr}
 }
+
+.speed-control{display:grid;grid-template-columns:auto minmax(120px,180px) 1fr;gap:8px;align-items:center;margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:14px;background:#fffaf4}
+.speed-control label{margin:0;font-weight:800;color:var(--ink)}
+.speed-note{font-size:12px;color:#667085;line-height:1.5}
+@media(max-width:700px){.speed-control{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -188,7 +193,7 @@ min-width:0;
 </div></div><div class="card">
 <h2>📺 きょうの どうが</h2><div class="video-url-row"><input id="videoUrl" inputmode="url" placeholder="ユーチューブの URLを いれてね" type="url"/><button class="primary" id="videoLoad">この どうがを つかう</button></div>
 <div class="video-wrap"><div id="youtubePlayer"></div></div>
-<div class="video-controls">
+<div class="speed-control"><label for="videoSpeed">どうがの はやさ</label><select id="videoSpeed"><option value="0.5">0.5ばい</option><option value="0.75">0.75ばい</option><option selected="" value="1">1ばい</option><option value="1.25">1.25ばい</option><option value="1.5">1.5ばい</option><option value="1.75">1.75ばい</option><option value="2">2ばい</option><option value="3">3ばい</option><option value="4">4ばい</option><option value="5">5ばい</option><option value="6">6ばい</option><option value="7">7ばい</option><option value="8">8ばい</option><option value="9">9ばい</option><option value="10">10ばい</option></select><div class="speed-note">3ばいいじょうは、すこしずつ とばして すすむよ。</div></div><div class="video-controls">
 <button class="blue" id="videoRestart">⏮ さいしょから</button>
 <button id="videoPlay">▶ つづきから</button>
 <button id="videoPause">⏸ とめる</button>
@@ -338,7 +343,33 @@ document.getElementById("swStop").onclick=()=>{if(!swTimer)return;swElapsed+=per
 document.getElementById("swReset").onclick=()=>{if(swTimer)clearInterval(swTimer);swTimer=null;swElapsed=0;document.getElementById("stopwatchTime").textContent="00:00.0"};
 
 let player,loopOn=false;
+let fastSeekTimer=null;
+let chosenVideoSpeed=1;
 let currentVideoId=localStorage.getItem("violinVideoId")||"A_AIidFDIWQ";
+
+
+function stopFastSeek(){
+  if(fastSeekTimer){clearInterval(fastSeekTimer);fastSeekTimer=null;}
+}
+function applyVideoSpeed(speed){
+  chosenVideoSpeed=Number(speed)||1;
+  stopFastSeek();
+  if(!player)return;
+  if(chosenVideoSpeed<=2){
+    if(player.setPlaybackRate)player.setPlaybackRate(chosenVideoSpeed);
+    return;
+  }
+  if(player.setPlaybackRate)player.setPlaybackRate(2);
+  if(player.playVideo)player.playVideo();
+  const tickMs=500;
+  fastSeekTimer=setInterval(()=>{
+    if(!player||!player.getCurrentTime||!player.seekTo)return;
+    const st=player.getPlayerState?player.getPlayerState():1;
+    if(st!==1)return;
+    const extra=(chosenVideoSpeed-2)*(tickMs/1000);
+    player.seekTo(player.getCurrentTime()+extra,true);
+  },tickMs);
+}
 
 function getYouTubeId(url){
   try{
@@ -358,6 +389,9 @@ function getYouTubeId(url){
 
 window.onYouTubeIframeAPIReady=()=>{player=new YT.Player("youtubePlayer",{videoId:currentVideoId,playerVars:{playsinline:1,rel:0},events:{onStateChange:e=>{if(loopOn&&e.data===YT.PlayerState.ENDED){player.seekTo(0);player.playVideo()}}}})};
 
+const videoSpeed=document.getElementById("videoSpeed");
+if(videoSpeed)videoSpeed.onchange=()=>applyVideoSpeed(videoSpeed.value);
+
 const videoUrl=document.getElementById("videoUrl");
 if(videoUrl)videoUrl.value=`https://www.youtube.com/watch?v=${currentVideoId}`;
 document.getElementById("videoLoad").onclick=()=>{
@@ -376,10 +410,10 @@ const api=document.createElement("script");api.src="https://www.youtube.com/ifra
 function ready(fn){if(player&&player[fn])player[fn]()}
 document.getElementById("videoRestart").onclick=()=>{if(player){player.seekTo(0);player.playVideo()}};
 document.getElementById("videoPlay").onclick=()=>ready("playVideo");
-document.getElementById("videoPause").onclick=()=>ready("pauseVideo");
-document.getElementById("videoSlow75").onclick=()=>player&&player.setPlaybackRate(.75);
-document.getElementById("videoSlow50").onclick=()=>player&&player.setPlaybackRate(.5);
-document.getElementById("videoNormal").onclick=()=>player&&player.setPlaybackRate(1);
+document.getElementById("videoPause").onclick=()=>{stopFastSeek();ready("pauseVideo")};
+document.getElementById("videoSlow75").onclick=()=>{if(videoSpeed)videoSpeed.value="0.75";applyVideoSpeed(0.75)};
+document.getElementById("videoSlow50").onclick=()=>{if(videoSpeed)videoSpeed.value="0.5";applyVideoSpeed(0.5)};
+document.getElementById("videoNormal").onclick=()=>{if(videoSpeed)videoSpeed.value="1";applyVideoSpeed(1)};
 document.getElementById("videoLoop").onclick=e=>{loopOn=!loopOn;e.target.textContent=`🔁 くりかえし: ${loopOn?"おん":"おふ"}`};
 
 const svg=document.getElementById("score"),NS="http://www.w3.org/2000/svg";
